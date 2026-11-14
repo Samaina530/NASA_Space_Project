@@ -16,6 +16,7 @@ for the challenge about telling the story of NASA's discarded equipment.
   mission fact when you reach the destination.
 
 * Live demo
+https://samaina530.github.io/NASA_Space_Project/
 
 * Built with
 HTML, CSS and JavaScript. No frameworks.
