@@ -57,8 +57,8 @@ const missions = {
         photos: [
             {
                 url: "https://images-assets.nasa.gov/image/PIA04413/PIA04413~orig.jpg",
-                title: "Opportunity on Mars",
-                caption: "An image from the Mars Exploration Rover mission."
+                title: "Artist's Concept of Opportunity on Mars",
+caption: "Artist's illustration of the Opportunity rover on Mars. Credit: NASA/JPL-Caltech."
             },
             {
                 url: "https://images-assets.nasa.gov/image/PIA05000/PIA05000~orig.jpg",
