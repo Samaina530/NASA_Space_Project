@@ -649,3 +649,22 @@ kbd {
         font-size: 9px;
     }
 }
+
+/* COMPLETION SCREEN CONTENT SPACING */
+
+#completionFact {
+    margin: 25px auto;
+    padding: 15px 20px;
+    line-height: 1.9;
+}
+
+#completionFact a {
+    display: inline-block;
+    margin-top: 18px;
+    margin-bottom: 20px;
+}
+
+#completeScreen button {
+    display: inline-block;
+    margin: 12px 10px;
+}
