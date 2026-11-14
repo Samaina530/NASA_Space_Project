@@ -1,3 +1,4 @@
+
 /* =========================================
    BEYOND THE SIGNAL
    MARS + MOON ROVER EXPERIENCE
@@ -29,6 +30,7 @@ const missionCode = document.getElementById("missionCode");
 const briefingTitle = document.getElementById("briefingTitle");
 const briefingText = document.getElementById("briefingText");
 const finalTime = document.getElementById("finalTime");
+const completionFact = document.getElementById("completionFact");
 
 
 /* =========================================
@@ -110,7 +112,6 @@ const planetSettings = {
 function createWorld() {
     rocks = [];
 
-    // Obstacles are placed along the rover's route.
     const positions = [
         [390, 390, 25],
         [590, 480, 32],
@@ -183,6 +184,7 @@ function resetMission() {
 
     cameraX = 0;
     elapsedTime = 0;
+    lastFrame = 0;
 
     gameState = "ready";
 
@@ -191,6 +193,10 @@ function resetMission() {
 
     timerDisplay.textContent = "00:00";
     objectiveStatus.textContent = "AWAITING DEPLOYMENT";
+
+    if (completionFact) {
+        completionFact.innerHTML = "";
+    }
 }
 
 
@@ -213,6 +219,7 @@ function startMission() {
 
     gameState = "running";
     startTime = performance.now();
+    lastFrame = startTime;
 
     startScreen.classList.add("hidden");
     completeScreen.classList.add("hidden");
@@ -289,10 +296,13 @@ document.querySelectorAll(".mobile-controls button").forEach(button => {
    8. ROVER MOVEMENT
 ========================================= */
 
-function updateRover() {
+function updateRover(deltaTime) {
     if (gameState !== "running") return;
 
     const settings = planetSettings[selectedPlanet];
+
+    // Normalize movement to approximately 60 FPS.
+    const frameScale = deltaTime / 16.667;
 
     const forward = keys["w"] || keys["arrowup"];
     const reverse = keys["s"] || keys["arrowdown"];
@@ -300,14 +310,14 @@ function updateRover() {
     const right = keys["d"] || keys["arrowright"];
 
     if (forward) {
-        rover.speed += settings.acceleration;
+        rover.speed += settings.acceleration * frameScale;
     }
 
     if (reverse) {
-        rover.speed -= settings.acceleration;
+        rover.speed -= settings.acceleration * frameScale;
     }
 
-    rover.speed *= settings.friction;
+    rover.speed *= Math.pow(settings.friction, frameScale);
 
     rover.speed = Math.max(
         -settings.maxSpeed * 0.55,
@@ -317,17 +327,16 @@ function updateRover() {
     if (Math.abs(rover.speed) > 0.08) {
         const steering = rover.speed > 0 ? 1 : -1;
 
-        if (left) rover.angle -= 0.035 * steering;
-        if (right) rover.angle += 0.035 * steering;
+        if (left) rover.angle -= 0.035 * steering * frameScale;
+        if (right) rover.angle += 0.035 * steering * frameScale;
     }
 
     const previousX = rover.x;
     const previousY = rover.y;
 
-    rover.x += Math.cos(rover.angle) * rover.speed;
-    rover.y += Math.sin(rover.angle) * rover.speed;
+    rover.x += Math.cos(rover.angle) * rover.speed * frameScale;
+    rover.y += Math.sin(rover.angle) * rover.speed * frameScale;
 
-    // Keep the rover inside the drivable area.
     rover.x = Math.max(35, Math.min(DESTINATION_X + 50, rover.x));
     rover.y = Math.max(290, Math.min(555, rover.y));
 
@@ -346,11 +355,10 @@ function updateRover() {
         }
     }
 
-    // Camera follows the rover.
+    // Camera follows rover.
     cameraX = rover.x - 300;
     cameraX = Math.max(0, Math.min(WORLD_WIDTH - canvas.width, cameraX));
 
-    // Mission completion.
     if (rover.x >= DESTINATION_X) {
         completeMission();
     }
@@ -387,10 +395,35 @@ function updateTelemetry() {
 
 
 /* =========================================
-   10. MISSION COMPLETION
+   10. HISTORICAL MISSION FACTS
+========================================= */
+
+const historicalFacts = {
+    mars: {
+        heading: "MISSION HISTORY / SPIRIT ROVER",
+        text:
+            "NASA's Spirit rover became stuck in soft Martian soil in 2009. In January 2010, NASA transitioned Spirit to a stationary science platform. It continued contributing to Mars research.",
+        link: "https://science.nasa.gov/mission/mer-spirit/",
+        linkText: "EXPLORE THE SPIRIT MISSION"
+    },
+
+    moon: {
+        heading: "MISSION HISTORY / APOLLO 11",
+        text:
+            "In 1969, Apollo 11's Lunar Module Eagle carried astronauts to the Moon. Its descent stage remained at the landing site after the mission.",
+        link: "https://science.nasa.gov/mission/apollo-11/",
+        linkText: "EXPLORE THE APOLLO 11 MISSION"
+    }
+};
+
+
+/* =========================================
+   11. MISSION COMPLETION
 ========================================= */
 
 function completeMission() {
+    if (gameState !== "running") return;
+
     gameState = "completed";
     rover.speed = 0;
 
@@ -403,12 +436,24 @@ function completeMission() {
 
     objectiveStatus.textContent = "DESTINATION REACHED";
 
+    const fact = historicalFacts[selectedPlanet];
+
+    if (completionFact && fact) {
+        completionFact.innerHTML = `
+            <h3>${fact.heading}</h3>
+            <p>${fact.text}</p>
+            <a href="${fact.link}" target="_blank" rel="noopener noreferrer">
+                ${fact.linkText} →
+            </a>
+        `;
+    }
+
     completeScreen.classList.remove("hidden");
 }
 
 
 /* =========================================
-   11. BACKGROUND AND LANDSCAPE
+   12. BACKGROUND AND LANDSCAPE
 ========================================= */
 
 function drawBackground() {
@@ -421,7 +466,6 @@ function drawBackground() {
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Moon stars.
     if (selectedPlanet === "moon") {
         for (let i = 0; i < 85; i++) {
             const x = (i * 137.5) % canvas.width;
@@ -476,10 +520,7 @@ function drawBackground() {
     ctx.fillRect(0, 290, canvas.width, 310);
 
     // Horizon glow.
-    const glow = ctx.createRadialGradient(
-        500, 290, 5,
-        500, 290, 450
-    );
+    const glow = ctx.createRadialGradient(500, 290, 5, 500, 290, 450);
 
     glow.addColorStop(0, selectedPlanet === "mars"
         ? "rgba(174,85,52,0.14)"
@@ -493,13 +534,10 @@ function drawBackground() {
 
 
 /* =========================================
-   12. SURFACE DETAILS
+   13. SURFACE DETAILS
 ========================================= */
 
 function drawSurface() {
-    const settings = planetSettings[selectedPlanet];
-
-    // Surface texture.
     for (let i = 0; i < 100; i++) {
         const worldX = (i * 83) % WORLD_WIDTH;
         const screenX = worldX - cameraX;
@@ -538,13 +576,8 @@ function drawSurface() {
 
         ctx.beginPath();
         ctx.ellipse(
-            screenX,
-            y,
-            radius,
-            radius * 0.45,
-            0,
-            0,
-            Math.PI * 2
+            screenX, y, radius, radius * 0.45,
+            0, 0, Math.PI * 2
         );
 
         ctx.fillStyle = "rgba(0,0,0,0.19)";
@@ -552,13 +585,9 @@ function drawSurface() {
 
         ctx.beginPath();
         ctx.ellipse(
-            screenX - 3,
-            y - 3,
-            radius * 0.8,
-            radius * 0.32,
-            0,
-            0,
-            Math.PI * 2
+            screenX - 3, y - 3,
+            radius * 0.8, radius * 0.32,
+            0, 0, Math.PI * 2
         );
 
         ctx.strokeStyle = "rgba(210,210,210,0.09)";
@@ -579,7 +608,7 @@ function drawSurface() {
         ctx.fill();
     });
 
-    // Slightly darker lower vignette.
+    // Lower vignette.
     const vignette = ctx.createLinearGradient(0, 400, 0, 600);
     vignette.addColorStop(0, "rgba(0,0,0,0)");
     vignette.addColorStop(1, "rgba(0,0,0,0.35)");
@@ -590,7 +619,7 @@ function drawSurface() {
 
 
 /* =========================================
-   13. ROCKS
+   14. ROCKS
 ========================================= */
 
 function drawRocks() {
@@ -647,7 +676,7 @@ function drawRocks() {
 
 
 /* =========================================
-   14. DESTINATION MARKER
+   15. DESTINATION MARKER
 ========================================= */
 
 function drawDestination() {
@@ -687,7 +716,7 @@ function drawDestination() {
 
 
 /* =========================================
-   15. ROVER DRAWING
+   16. ROVER DRAWING
 ========================================= */
 
 function drawRover() {
@@ -771,7 +800,7 @@ function drawRover() {
 
 
 /* =========================================
-   16. HUD OVERLAY ON CANVAS
+   17. HUD OVERLAY ON CANVAS
 ========================================= */
 
 function drawCanvasHUD() {
@@ -815,7 +844,7 @@ function drawCanvasHUD() {
 
 
 /* =========================================
-   17. RENDER GAME
+   18. RENDER GAME
 ========================================= */
 
 function drawGame() {
@@ -831,7 +860,7 @@ function drawGame() {
 
 
 /* =========================================
-   18. GAME LOOP
+   19. GAME LOOP
 ========================================= */
 
 function gameLoop(timestamp) {
@@ -840,7 +869,7 @@ function gameLoop(timestamp) {
 
     if (gameState === "running") {
         elapsedTime = timestamp - startTime;
-        updateRover();
+        updateRover(delta);
     }
 
     drawGame();
@@ -850,7 +879,7 @@ function gameLoop(timestamp) {
 
 
 /* =========================================
-   19. INITIAL SETUP
+   20. INITIAL SETUP
 ========================================= */
 
 createWorld();
