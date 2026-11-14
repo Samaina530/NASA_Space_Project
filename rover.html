@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surface Operations | Beyond the Signal</title>
+    <link rel="stylesheet" href="rover.css">
+</head>
+
+<body>
+
+    <header class="topbar">
+        <a href="index.html" class="back-link">← BACK TO MUSEUM</a>
+
+        <div class="brand">
+            <span class="brand-name">BEYOND THE SIGNAL</span>
+            <span class="brand-subtitle">SURFACE OPERATIONS</span>
+        </div>
+
+        <div class="system-status">
+            <span class="status-dot"></span>
+            SYSTEM ONLINE
+        </div>
+    </header>
+
+    <main>
+
+        <!-- MISSION SELECTION -->
+        <section class="selection-screen" id="selectionScreen">
+
+            <div class="intro">
+                <p class="eyebrow">DEEP SPACE EXPLORATION PROGRAM</p>
+                <h1>THE SURFACE<br><span>IS YOURS.</span></h1>
+                <p class="intro-description">
+                    Take control of an exploration rover. Navigate unknown
+                    terrain, avoid obstacles, and reach your research destination.
+                </p>
+            </div>
+
+            <div class="mission-options">
+
+                <article class="mission-card mars-card">
+                    <div class="card-number">MISSION 01</div>
+                    <div class="planet-label">MARS / SOL 001</div>
+                    <h2>MARS</h2>
+                    <p>
+                        A silent, dust-covered world. Navigate the rocky
+                        Martian surface and reach the research zone.
+                    </p>
+                    <div class="card-bottom">
+                        <span>ROCKY TERRAIN · LOW VISIBILITY</span>
+                        <button class="launch-button" data-planet="mars">
+                            ENTER MARS →
+                        </button>
+                    </div>
+                </article>
+
+                <article class="mission-card moon-card">
+                    <div class="card-number">MISSION 02</div>
+                    <div class="planet-label">LUNAR / DAY 001</div>
+                    <h2>THE MOON</h2>
+                    <p>
+                        Beyond Earth's atmosphere, cross the cratered lunar
+                        landscape and locate the designated research zone.
+                    </p>
+                    <div class="card-bottom">
+                        <span>CRATERED TERRAIN · LOW GRAVITY</span>
+                        <button class="launch-button" data-planet="moon">
+                            ENTER MOON →
+                        </button>
+                    </div>
+                </article>
+
+            </div>
+
+            <p class="selection-footer">
+                TWO WORLDS. TWO MISSIONS. ONE EXPLORATION ROVER.
+            </p>
+        </section>
+
+
+        <!-- GAME SCREEN -->
+        <section class="game-screen hidden" id="gameScreen">
+
+            <div class="game-heading">
+                <div>
+                    <p class="eyebrow" id="missionCode">MISSION 01 / MARS</p>
+                    <h2 id="missionTitle">MARS SURFACE OPERATIONS</h2>
+                </div>
+
+                <button class="exit-button" id="exitButton">
+                    EXIT MISSION ✕
+                </button>
+            </div>
+
+            <div class="game-layout">
+
+                <div class="game-main">
+
+                    <div class="canvas-wrap">
+
+                        <canvas id="gameCanvas" width="1000" height="600"></canvas>
+
+                        <div class="game-overlay" id="startScreen">
+                            <p class="overlay-label">MISSION BRIEFING</p>
+                            <h2 id="briefingTitle">MARS EXPEDITION</h2>
+                            <p id="briefingText">
+                                Your objective is to navigate the surface
+                                and reach the designated research zone.
+                            </p>
+                            <button class="primary-button" id="startButton">
+                                BEGIN EXPLORATION →
+                            </button>
+                        </div>
+
+                        <div class="game-overlay hidden" id="completeScreen">
+                            <p class="overlay-label">MISSION COMPLETE</p>
+                            <h2>DESTINATION REACHED.</h2>
+                            <p>
+                                The rover has successfully reached the
+                                designated research zone.
+                            </p>
+                            <div class="completion-time">
+                                MISSION TIME: <span id="finalTime">00:00</span>
+                            </div>
+                            <button class="primary-button" id="replayButton">
+                                REPLAY MISSION ↻
+                            </button>
+                            <button class="secondary-button" id="menuButton">
+                                RETURN TO MISSIONS
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <div class="game-bottom">
+                        <div class="legend">
+                            <span><i class="legend-rover"></i> ROVER</span>
+                            <span><i class="legend-target"></i> DESTINATION</span>
+                            <span><i class="legend-rock"></i> ROCKS</span>
+                        </div>
+
+                        <div class="control-hint">
+                            W A S D / ARROW KEYS TO DRIVE
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <!-- TELEMETRY -->
+                <aside class="telemetry-panel">
+
+                    <div class="telemetry-heading">
+                        <span>LIVE TELEMETRY</span>
+                        <span class="live-indicator">● LIVE</span>
+                    </div>
+
+                    <div class="telemetry-item">
+                        <span class="telemetry-label">MISSION ELAPSED</span>
+                        <strong id="timer">00:00</strong>
+                    </div>
+
+                    <div class="telemetry-item">
+                        <span class="telemetry-label">ROVER POSITION</span>
+                        <strong id="position">X: 000 / Y: 000</strong>
+                    </div>
+
+                    <div class="telemetry-item">
+                        <span class="telemetry-label">DISTANCE PROGRESS</span>
+                        <strong id="progressText">0%</strong>
+                        <div class="progress-track">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
+                    </div>
+
+                    <div class="telemetry-item">
+                        <span class="telemetry-label">MISSION OBJECTIVE</span>
+                        <strong id="objectiveStatus">AWAITING DEPLOYMENT</strong>
+                    </div>
+
+                    <div class="telemetry-item">
+                        <span class="telemetry-label">SURFACE CONDITIONS</span>
+                        <strong id="surfaceCondition">UNKNOWN</strong>
+                    </div>
+
+                    <div class="side-controls">
+                        <p>DRIVING CONTROLS</p>
+                        <div class="key-row">
+                            <kbd>W</kbd><span>Forward</span>
+                        </div>
+                        <div class="key-row">
+                            <kbd>A</kbd><span>Turn left</span>
+                        </div>
+                        <div class="key-row">
+                            <kbd>S</kbd><span>Reverse</span>
+                        </div>
+                        <div class="key-row">
+                            <kbd>D</kbd><span>Turn right</span>
+                        </div>
+                    </div>
+
+                </aside>
+
+            </div>
+
+            <!-- MOBILE CONTROLS -->
+            <div class="mobile-controls">
+                <button data-key="ArrowUp">▲</button>
+                <div>
+                    <button data-key="ArrowLeft">◀</button>
+                    <button data-key="ArrowDown">▼</button>
+                    <button data-key="ArrowRight">▶</button>
+                </div>
+            </div>
+
+            <p class="disclaimer">
+                EDUCATIONAL SIMULATION · NOT AN OFFICIAL NASA SIMULATOR
+            </p>
+
+        </section>
+
+    </main>
+
+    <script src="rover.js"></script>
+</body>
+</html>
