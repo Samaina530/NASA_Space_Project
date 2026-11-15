@@ -411,7 +411,7 @@ const historicalFacts = {
         heading: "MISSION HISTORY / APOLLO 11",
         text:
             "In 1969, Apollo 11's Lunar Module Eagle carried astronauts to the Moon. Its descent stage remained at the landing site after the mission.",
-        link: "https://science.nasa.gov/mission/apollo-11/",
+        link: "https://www.nasa.gov/mission/apollo-11/"
         linkText: "EXPLORE THE APOLLO 11 MISSION"
     }
 };
